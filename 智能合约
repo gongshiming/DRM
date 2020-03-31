@@ -1,0 +1,193 @@
+pragma solidity ^0.4.20;
+pragma experimental ABIEncoderV2;
+
+contract releaseInBatches {
+    
+    address public administrator;
+    constructor() public{
+        administrator = msg.sender;
+    }
+    
+    //creators
+    // mapping(address => uint256) public creator;
+    struct creator {
+        address[] add;
+        uint256[] proportion;
+    }
+    struct price {
+        string[] rightDescribe;
+        uint256[] price;
+    }
+    struct content {
+        string ipfs;
+        string contentDescribe;
+        creator creators;
+        price prices;
+    }
+    
+    content[] public contentSet;
+    content public totalContentSet;
+    
+    // event eventReleaseTotalContentSet(string ipfs_, string describe_);
+    event eventReleaseContent
+    (string ipfs_, string describe_, string[] rightDescribe_, uint256[] price_);
+    function releaseTotalContentSet() public {
+        require(msg.sender == administrator);
+        emit eventReleaseContent(
+            totalContentSet.ipfs, totalContentSet.contentDescribe, 
+            totalContentSet.prices.rightDescribe, totalContentSet.prices.price);
+    }
+    function releaseContent(string _ipfs) public {
+        require(msg.sender == administrator);
+        for(uint16 i = 0; i < contentSet.length; i++) {
+            if(keccak256(_ipfs) == keccak256(contentSet[i].ipfs)) {
+                emit eventReleaseContent
+                (_ipfs, contentSet[i].contentDescribe, 
+                contentSet[i].prices.rightDescribe, contentSet[i].prices.price);
+                break;
+            }
+        }
+        // emit eventReleaseContent()
+    }
+    // provided that a administrator have a contentSet, 
+    // but the contentSet contain several content
+    function setTotalContentSet(string _ipfs, string _contentDescribe) public {
+        require(msg.sender == administrator);
+        totalContentSet.ipfs = _ipfs;
+        totalContentSet.contentDescribe = _contentDescribe;
+    }
+    function addCreatorsForTotalContentSet(address _creator, uint256 _proportion) public {
+        require(msg.sender == administrator);
+        uint256 alreadyProportion;
+        for (uint256 i = 0; i < totalContentSet.creators.proportion.length; i++) {
+            alreadyProportion += totalContentSet.creators.proportion[i];
+        }
+        if((alreadyProportion + _proportion) > 100) {
+            revert();
+        }
+        totalContentSet.creators.add.push(_creator);
+        totalContentSet.creators.proportion.push(_proportion);
+    }
+    function addPriceForTotalContentSet(string _rightDescribe, uint256 _price) public {
+        require(msg.sender == administrator);
+        totalContentSet.prices.rightDescribe.push(_rightDescribe);
+        totalContentSet.prices.price.push(_price);
+    }
+    
+    function getInformationOfCreatorInTotalContentSet() view public returns 
+    (string ipfs_, address[] creatorAddress_, uint256[] proportion_) {
+        ipfs_ = totalContentSet.ipfs;
+        creatorAddress_ = totalContentSet.creators.add;
+        proportion_ = totalContentSet.creators.proportion;
+    }
+    function getInformationOfPriceInTotalContentSet() view public returns
+    (string ipfs_, string[] rightDescribe_, uint256[] price_) {
+        ipfs_ = totalContentSet.ipfs;
+        rightDescribe_ = totalContentSet.prices.rightDescribe;
+        price_ = totalContentSet.prices.price;
+    }
+    // ----------every content-----------
+    function addContentToContentSet(string _ipfs, string _contentDescribe) public
+    returns (uint256 countOfContents_){
+        require(msg.sender == administrator);
+        if(contentSet.length != 0) {
+            for(uint16 i = 0; i < contentSet.length; i++) {
+                if(keccak256(_ipfs) == keccak256(contentSet[i].ipfs)) {
+                    revert();
+                }
+            }
+        }
+        
+        content memory content1;
+        content1.ipfs = _ipfs;
+        content1.contentDescribe = _contentDescribe;
+        contentSet.push(content1);
+        countOfContents_ = contentSet.length;
+    }
+    
+    function addCreatorsForContent
+    (string _ipfs, address _creator, uint256 _proportion) public{
+        require(msg.sender == administrator);
+        bool isOK1 = false;
+        bool isOK2 = false;
+        uint256 alreadyProportion1;
+        for(uint16 i = 0; i < contentSet.length; i++) {
+            alreadyProportion1 = 0;
+            if(keccak256(_ipfs) == keccak256(contentSet[i].ipfs)) {
+                isOK1 = true;
+                for(uint256 j = 0; j < contentSet[i].creators.proportion.length; j++) {
+                    alreadyProportion1 += contentSet[i].creators.proportion[j];
+                    if(_creator == contentSet[i].creators.add[j]) {
+                        isOK2 = true;
+                        require((alreadyProportion1 + _proportion) <= 100);
+                        contentSet[i].creators.proportion[j] = _proportion;
+                        
+                    }
+                }
+                if(!isOK2) {
+                    contentSet[i].creators.add.push(_creator);
+                    contentSet[i].creators.proportion.push(_proportion);
+                }
+            }
+        }
+        if(!isOK1) {
+            revert();
+        }
+    }
+    
+    function addPriceInformationForContent
+    (string _ipfs, string _rightDescribe, uint256 _price) public{
+        require(msg.sender == administrator);
+        bool isOK1 = false;
+        for(uint16 i = 0; i < contentSet.length; i++) {
+            if(keccak256(_ipfs) == keccak256(contentSet[i].ipfs)) {
+                isOK1 = true;
+                contentSet[i].prices.rightDescribe.push(_rightDescribe);
+                contentSet[i].prices.price.push(_price);
+            }
+        }
+        if(!isOK1) {
+            revert();
+        }
+    }
+
+    function getInformationOfContent(uint256 _indexOfContent)
+    view public returns 
+    (string ipfs_, uint256 countOfContents_, address[] creatorAddress_, 
+    uint256[] proportion_, string[] rightDescribe_, uint256[] price_) {
+        require(_indexOfContent < contentSet.length);
+        ipfs_ = contentSet[_indexOfContent].ipfs;
+        countOfContents_ =  contentSet.length;
+        creatorAddress_ = contentSet[_indexOfContent].creators.add;
+        proportion_ = contentSet[_indexOfContent].creators.proportion;
+        rightDescribe_ = contentSet[_indexOfContent].prices.rightDescribe;
+        price_ = contentSet[_indexOfContent].prices.price;
+    }
+    //------------------transaction-------------------
+    function buySingleRight(uint256 _contentIndex, uint256 _rightIndex) 
+    payable public returns
+    (string rightDescribe_) {
+        require(msg.value >= contentSet[_contentIndex].prices.price[_rightIndex]*1e18);
+        for(uint256 i = 0; i < contentSet[_contentIndex].creators.add.length; i++) {
+            contentSet[_contentIndex].creators.add[i].transfer
+            (contentSet[_contentIndex].prices.price[_rightIndex]
+            *contentSet[_contentIndex].creators.proportion[i]*1e18/100);
+        }
+        msg.sender.transfer
+        (msg.value - contentSet[_contentIndex].prices.price[_rightIndex]*1e18);
+        rightDescribe_ = contentSet[_contentIndex].prices.rightDescribe[_rightIndex];
+    }
+    function buyTotalRight(uint256 _rightIndex) payable public 
+    returns (string rightDescribe_) {
+        require(msg.value >= totalContentSet.prices.price[_rightIndex]*1e18);
+        for(uint256 i = 0; i < totalContentSet.creators.add.length; i++) {
+            totalContentSet.creators.add[i].transfer
+            (totalContentSet.prices.price[_rightIndex]
+            *totalContentSet.creators.proportion[i]*1e18/100);
+        }
+        msg.sender.transfer
+        (msg.value - totalContentSet.prices.price[_rightIndex]*1e18);
+        rightDescribe_ = totalContentSet.prices.rightDescribe[_rightIndex];
+    }
+    
+}

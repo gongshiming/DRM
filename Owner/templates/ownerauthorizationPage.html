@@ -1,0 +1,102 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="UTF-8">
+    <title>版权消费者购买系统</title>
+    <link rel="stylesheet" href="{% static 'owner/css/font.css' %}">
+    <link rel="stylesheet" href="{% static 'owner/css/xadmin.css' %}">
+    <link rel="stylesheet" href="{% static 'owner/lib/layui/css/layui.css' %}"  media="all">
+    <script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript" src="{% static 'owner/lib/layui/layui.js' %}" charset="utf-8"></script>
+    <script type="text/javascript" src="{% static 'owner/js/xadmin.js' %}"></script>
+  </head>
+<body >
+    <table id="demo" lay-filter="test" cellpadding="-10" style="margin-top: -10px"></table>
+    <script>
+    layui.use('table', function(){
+      var table = layui.table;
+      //第一个实例
+      table.render({
+        elem: '#demo'
+        ,height: 480
+        ,url: '/owner/ownerauthorization' //数据接口
+        ,page: true //开启分页
+        ,toolbar:'#toolbarDemo'
+        ,cols: [[ //表头
+          {field: 'product_bcId', title: '版权链上id', width: 100}
+          ,{field: 'permisson', title: '版权权限', width:90}
+          ,{field: 'product_name', title: '版权名', width:80}
+          ,{field: 'product_version', title: '版本', width:80, sort: true}
+          ,{field: 'buyer_nickname', title: '买家昵称', width: 130}
+          ,{field: 'buyer_email', title: '买家email', width: 150}
+          ,{field: 'msg', title: '买家留言', width: 110}
+          ,{field: 'time', title: '请求时间', width: 170, sort: true}
+          ,{fixed: 'right', width:120, align:'center', toolbar: '#barDemo',hiddenField:'msg_id'}
+        ]]
+      });
+      table.on('tool(test)', function(obj){ //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
+          var data = obj.data;
+          var layEvent = obj.event; //获得 lay-event 对应的的值（也可以是表头的 event 参数对应的值）
+          var tr = obj.tr; //获得当前行 tr 的 DOM 对象（如果有话）
+          if(layEvent === 'authorization'){ //查看
+            layer.open({
+              type: 2 //Page层类型
+              ,area: ['800px', '450px']
+              ,title: 'blockchainID:'+data.product_bcId+',productIndex:'+data.permission
+              ,shade: 0.6 //遮罩透明度
+              ,maxmin: true //允许全屏最小化
+              ,anim: 1 //0-6的动画形式，-1不开
+              ,content: '/buyer/buyerproductdetail?hash='+data.product_hashLink
+            });
+          }
+          else if(layEvent === 'download') {
+              layer.open({
+              type: 2 //Page层类型
+              ,content: '/buyer/buyerproductdownload/'+data.product_bcId+'/'+data.permission+'/'
+              ,title: '跳转中'
+              ,time:500
+            });
+          }
+      });
+        $('body').on('keyup','#search',function(data){
+          if(data.keyCode ==13){
+            search = $("#search").val();
+            if(search != ''){
+                {#layer.msg(search);#}
+                table.reload('demo',{
+                    where:{
+                        'search':search
+                    }
+                    ,page: {
+                        curr: 1
+                    }
+                    ,url: '/buyer/mypurchaseproductfuzzysearch'
+                    ,method: 'GET'
+                 });
+            }else {
+                table.reload('demo',{
+                    url: '/buyer/ownerauthorization'
+                    ,method: 'GET'
+                 });
+            }
+        }
+      });
+    });
+    </script>
+    <script type="text/html" id="barDemo">
+      <a class="layui-btn layui-btn-xs" lay-event="authorization">授权</a>
+      <a class="layui-btn layui-btn-xs" lay-event="detail">详情</a>
+    </script>
+    <script type="text/html" id="toolbarDemo" >
+       <input class="text" style="height:30px;width:157px;" name="search" id="search" placeholder="请输入关键词">
+       <a id="" lay-filter="" style="position: absolute;left: 144px;">
+            <i  name = 'submit' id ='submit 'class="layui-icon layui-icon-search" style="background:#fff;padding:5px;"></i>
+       </a>
+  </script>
+  <script>
+
+  </script>
+    </body>
+</html>

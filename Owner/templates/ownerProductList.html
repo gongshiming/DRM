@@ -1,0 +1,58 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="UTF-8">
+    <title>版权拥有者发布系统后台页面</title>
+    <link rel="stylesheet" href="{% static 'owner/css/font.css' %}">
+    <link rel="stylesheet" href="{% static 'owner/css/xadmin.css' %}">
+    <script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript" src="{% static 'owner/lib/layui/layui.js' %}" charset="utf-8"></script>
+    <script type="text/javascript" src="{% static 'owner/js/xadmin.js' %}"></script>
+  </head>
+
+  <body class="layui-anim layui-anim-up">
+    <div class="x-nav">
+      <span class="layui-breadcrumb">
+        <a href="{% url 'owner:index' %}">版权管理</a>
+        <a href="">版权列表</a>
+      </span>
+    </div>
+    <div class="x-body">
+      <table class="layui-table">
+        <thead>
+          <tr>
+		    <th>版权链上id</th>
+            <th>版权名称</th>
+            <th>版权交易hash</th>
+            <th>版权版本</th>
+            <th>版权授权数</th>
+            <th>版权状态</th>
+			<th>版权ipfs hash</th>
+            <th>操作</th>
+			</tr>
+        </thead>
+        <tbody>
+          {% for i in product_List %}
+              <tr>
+                <td>{{ i.product_bcId }}</td>
+                <td>{{ i.product_name }}</td>
+                <td>{{ i.product_transactionHash }}</td>
+                <td>{{ i.product_version }}</td>
+                <td>{{ i.product_index }}</td>
+                <td>{{ i.product_status }}</td>
+                <td>{{ i.product_hashLink }}</td>
+                <td >
+                    <a href="/owner/ownerproductchange/{{ i.product_bcId }}/">编辑</a> <a href="/owner/ownerproductdetail/{{ i.product_bcId }}/">详情</a>
+                </td>
+              </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+    </div>
+        <p style="text-align: center; color: red;">{{ result.msg }}</p>
+  </body>
+
+</html>

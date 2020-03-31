@@ -1,0 +1,153 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>版权拥有者发布系统后台页面</title>
+    <link rel="stylesheet" href="{% static 'owner/css/font.css' %}">
+    <link rel="stylesheet" href="{% static 'owner/css/xadmin.css' %}">
+    <link rel="stylesheet" href="{% static 'owner/lib/layui/css/layui.css' %}" media="all">
+    <script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript" src="{% static 'owner/lib/layui/layui.js' %}" charset="utf-8"></script>
+    <script type="text/javascript" src="{% static 'owner/js/xadmin.js' %}"></script>
+</head>
+
+
+<body>
+<div class="x-body layui-anim layui-anim-up">
+    <form class="layui-form" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+                <span class="x-red">*</span>版权名称
+            </label>
+            <div class="layui-input-block">
+                <input type="text" id="L_email" name="product_name" required=""
+                       autocomplete="off" class="layui-input" value="{{ product.product_name }}" placeholder="请输入内容">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+                <span class="x-red">*</span>版权版本
+            </label>
+            <div class="layui-input-block">
+                <input type="text" id="L_username" name="product_version" required=""
+                       autocomplete="off" class="layui-input" value="{{ product.product_version }}" placeholder="请输入内容">
+            </div>
+        </div>
+        {#        <div class="layui-form-item">#}
+        {#            <label class="layui-form-label">#}
+        {#                <span class="x-red">*</span>版权分类#}
+        {#            </label>#}
+        {#            <div class="layui-input-inline">#}
+        {#                <input type="text" id="L_pass" name="product_category" required=""#}
+        {#                       autocomplete="off" class="layui-input" value="{{ product.product_category }}"#}
+        {#                       placeholder="请输入内容">#}
+        {#            </div>#}
+        {#        </div>#}
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+                <span class="x-red">*</span>版权分类
+            </label>
+            <div class="layui-input-block">
+                <select name="product_category" lay-verify="required" style="width: 100px">
+                    <option value=""></option>
+                    <option value="0">摄影</option>
+                    <option value="1">美术</option>
+                    <option value="2">软件</option>
+                    <option value="3">口述</option>
+                    <option value="4">文字</option>
+                    <option value="5">图形</option>
+                    <option value="6">其他</option>
+                </select>
+            </div>
+        </div>
+        {#        <div class="layui-form-item">#}
+        {#            <label class="layui-form-label">#}
+        {#                <span class="x-red">*</span>版权状态#}
+        {#            </label>#}
+        {#            <div class="layui-input-inline">#}
+        {#                <input type="text" id="L_repass" name="product_status" required=""#}
+        {#                       autocomplete="off" class="layui-input" value="{{ product.product_status }}" placeholder="请输入内容">#}
+        {#            </div>#}
+        {#        </div>#}
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+                <span class="x-red">*</span>版权状态
+            </label>
+            <div class="layui-input-block">
+                <input type="radio" name="product_status" value="True" title="开售" checked>
+                <input type="radio" name="product_status" value="False" title="不开售">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+                <span class="x-red">*</span>授权验证
+            </label>
+            <div class="layui-input-block">
+                <input type="radio" name="authorization" value="True" title="需要验证授权" checked>
+                <input type="radio" name="authorization" value="False" title="无需验证授权">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <p for="L_repass" class="layui-form-label">
+                <span class="x-red">*</span>版权说明
+            </p>
+
+            {#              <div>#}
+            <div class="layui-input-block">
+            <textarea name="product_state" placeholder="请输入内容" autocomplete="off"
+                      class="layui-textarea">{{ product.product_state }}</textarea>
+            </div>
+            {#                  <input type="text" id="L_repass" name="goods_description" required=""#}
+            {#                  autocomplete="off" class="layui-input" value="{{ goods.goods_description }}">#}
+            {#              </div>#}
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+                <span class="x-red">*</span>添加版权
+            </label>
+            <div class="layui-input-block">
+                <input type="file" id="L_repass" name="prodcut_files" required=""
+                       autocomplete="off" class="layui-input" multiple>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">
+                <span class="x-red">*</span>版权价格
+            </label>
+            <div class="layui-input-block">
+                <input type="text" id="L_repass" name="product_price" required=""
+                       autocomplete="off" class="layui-input" placeholder="不同权限使用“，”隔开">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label for="L_repass" class="layui-form-label">
+            </label>
+            <input type="submit" class="layui-btn" lay-filter="add" value="添加">
+        </div>
+    </form>
+</div>
+<p style="text-align: center; color: red;">{{ result.msg }}</p>
+{% if result.msg %}
+    <script>
+        layui.use('layer', function () {
+        var layer = layui.layer;
+        {#layer.alert('heheheheh');#}
+        layer.open({
+            type: 1 //Page层类型
+            , area: ['800px', '450px']
+            , title: '相应消息'
+            , shade: 0.6 //遮罩透明度
+            , maxmin: true //允许全屏最小化
+            , anim: 1 //0-6的动画形式，-1不开
+            , content: {{ result.msg }}
+        });
+    });
+
+    </script>
+{% endif %}
+</body>
+
+</html>

@@ -1,0 +1,160 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="UTF-8">
+    <title>版权消费者购买系统</title>
+    <link rel="stylesheet" href="{% static 'buyer/css/font.css' %}">
+    <link rel="stylesheet" href="{% static 'buyer/css/xadmin.css' %}">
+    <link rel="stylesheet" href="{% static 'buyer/lib/layui/css/layui.css' %}"  media="all">
+    <script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript" src="{% static 'buyer/lib/layui/layui.js' %}" charset="utf-8"></script>
+    <script type="text/javascript" src="{% static 'buyer/js/xadmin.js' %}"></script>
+  </head>
+
+{#  <body class="layui-anim layui-anim-up" >#}
+{#    <div class="x-nav">#}
+{#      <span class="layui-breadcrumb">#}
+{#        <a href="">数字版权消费</a>#}
+{#        <a href="">我购买的数字版权</a>#}
+{#      </span>#}
+{#    </div>#}
+{#    <div class="x-body">#}
+{#      <table class="layui-table" lay-filter="test">#}
+{#        <thead>#}
+{#          <tr>#}
+{#            <th>版权名</th>#}
+{#            <th>版权版本</th>#}
+{#            <th>版权权限</th>#}
+{#		    <th>版权购买生成链上id</th>#}
+{#            <th>版权链上id</th>#}
+{#            <th>交易记录块</th>#}
+{#            <th>交易时间戳</th>#}
+{#            <th>操作</th>#}
+{#			</tr>#}
+{#        </thead>#}
+{#        <tbody>#}
+{#          {% for i in purchase_List %}#}
+{#              <tr>#}
+{#                <td>{{ i.product_name }}</td>#}
+{#                <td>{{ i.product_version }}</td>#}
+{#                <td>{{ i.permission }}</td>#}
+{#                <td>{{ i.purchaseId }}</td>#}
+{#                <td>{{ i.product_bcId }}</td>#}
+{#                <td>{{ i.blocknum }}</td>#}
+{#                <td>{{ i.timestamp }}</td>#}
+{#                <td >#}
+{#                    <a href="/buyer/buyerproductdownload/{{ i.product_bcId }}/{{ i.permission }}/">下载</a>#}
+{#                    <a href="/buyer/buyerproductsecret/{{ i.product_bcId }}/{{ i.permission }}/">许可证</a>#}
+{#                    <a href="/buyer/buyerproductdetail/{{ i.product_bcId }}/">详情</a>#}
+{#                </td>#}
+{#              </tr>#}
+{#          {% endfor %}#}
+{#        </tbody>#}
+{#      </table>#}
+{##}
+{#    </div>#}
+{#        <p style="text-align: center; color: red;">{{ result.msg }}</p>#}
+{#  </body>#}
+<body >
+    <table id="demo" lay-filter="test" cellpadding="-10" style="margin-top: -10px"></table>
+    <script>
+    layui.use('table', function(){
+      var table = layui.table;
+      //第一个实例
+      table.render({
+        elem: '#demo'
+        ,height: 480
+        ,url: '/buyer/mypurchaseproductlist' //数据接口
+        ,page: true //开启分页
+        ,toolbar:'#toolbarDemo'
+        ,cols: [[ //表头
+
+          {field: 'product_name', title: '版权名', width:80}
+          ,{field: 'product_version', title: '版本', width:80, sort: true}
+          ,{field: 'permission', title: '版权权限', width:90}
+          ,{field: 'purchaseId', title: '版权购买链上id', width: 130}
+          ,{field: 'product_bcId', title: '版权链上id', width: 100}
+          ,{field: 'blocknum', title: '交易记录块', width: 120, sort: true}
+          ,{field: 'timestamp', title: '链上时间戳', width: 110}
+          ,{field: 'time', title: '交易时间', width: 170, sort: true}
+          ,{fixed: 'right', width:180, align:'center', toolbar: '#barDemo',hiddenField:'product_hashLink'}
+        ]]
+      });
+      table.on('tool(test)', function(obj){ //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
+          var data = obj.data;
+          var layEvent = obj.event; //获得 lay-event 对应的的值（也可以是表头的 event 参数对应的值）
+          var tr = obj.tr; //获得当前行 tr 的 DOM 对象（如果有话）
+          if(layEvent === 'detail'){ //查看
+            layer.open({
+              type: 2 //Page层类型
+              ,area: ['800px', '450px']
+              ,title: 'blockchainID:'+data.product_bcId+',productIndex:'+data.permission
+              ,shade: 0.6 //遮罩透明度
+              ,maxmin: true //允许全屏最小化
+              ,anim: 1 //0-6的动画形式，-1不开
+              ,content: '/buyer/buyerproductdetail?hash='+data.product_hashLink
+            });
+          }
+          else if(layEvent === 'download') {
+              layer.open({
+              type: 2 //Page层类型
+              ,content: '/buyer/buyerproductdownload/'+data.product_bcId+'/'+data.permission+'/'
+              ,title: '跳转中'
+              ,time:500
+            });
+          }
+          else if(layEvent === 'secret') {
+              layer.open({
+              type: 2 //Page层类型
+              ,area: ['500px', '200']
+              ,title: '版权链上ID:'+data.product_bcId+',版权权限:'+data.permission
+              ,shade: 0.6 //遮罩透明度
+              ,maxmin: true //允许全屏最小化
+              ,anim: 1 //0-6的动画形式，-1不开
+              ,content: '/buyer/buyerproductsecret/'+data.product_bcId+'/'+data.permission+'/'
+            });
+          }
+      });
+        $('body').on('keyup','#search',function(data){
+          if(data.keyCode ==13){
+            search = $("#search").val();
+            if(search != ''){
+                {#layer.msg(search);#}
+                table.reload('demo',{
+                    where:{
+                        'search':search
+                    }
+                    ,page: {
+                        curr: 1
+                    }
+                    ,url: '/buyer/mypurchaseproductfuzzysearch'
+                    ,method: 'GET'
+                 });
+            }else {
+                table.reload('demo',{
+                    url: '/buyer/mypurchaseproductlist'
+                    ,method: 'GET'
+                 });
+            }
+        }
+      });
+    });
+    </script>
+    <script type="text/html" id="barDemo">
+      <a class="layui-btn layui-btn-xs" lay-event="download">下载</a>
+      <a class="layui-btn layui-btn-xs" lay-event="secret">许可证</a>
+      <a class="layui-btn layui-btn-xs" lay-event="detail">详情</a>
+    </script>
+    <script type="text/html" id="toolbarDemo" >
+       <input class="text" style="height:30px;width:157px;" name="search" id="search" placeholder="请输入关键词">
+       <a id="" lay-filter="" style="position: absolute;left: 144px;">
+            <i  name = 'submit' id ='submit 'class="layui-icon layui-icon-search" style="background:#fff;padding:5px;"></i>
+       </a>
+  </script>
+  <script>
+
+  </script>
+    </body>
+</html>

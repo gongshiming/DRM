@@ -1,0 +1,95 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>版权消费者购买系统</title>
+    <link rel="stylesheet" href="{% static 'buyer/css/font.css' %}">
+    <link rel="stylesheet" href="{% static 'buyer/css/xadmin.css' %}">
+      <link rel="stylesheet" href="{% static 'buyer/lib/layui/css/layui.css' %}" media="all">
+      <script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript" src="{% static 'buyer/lib/layui/layui.js' %}" charset="utf-8"></script>
+    <script type="text/javascript" src="{% static 'buyer/js/xadmin.js' %}"></script>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  </head>
+
+  <body >
+    <table id="demo" lay-filter="test" cellpadding="-10" style="margin-top: -10px"></table>
+
+    <script>
+    layui.use('table', function(){
+      var table = layui.table;
+      //第一个实例
+      table.render({
+        elem: '#demo'
+        ,height: 460
+        ,url: '/buyer/buyershoppingcarlist' //数据接口
+        ,page: true //开启分页
+        ,toolbar:'#toolbarDemo'
+        ,cols: [[ //表头
+          {field: 'product_bcId', title: '上链ID', width:90, sort: true, fixed: 'left'}
+          ,{field: 'product_name', title: '版权名', width:100}
+          ,{field: 'type', title: '类型', width:160, sort: true}
+          ,{field: 'product_state', title: '说明', width:400}
+          ,{field: 'product_price', title: '价格', width: 200, sort: true}
+          ,{field: 'time', title: '操作时间', width: 200, sort: true}
+          ,{fixed: 'right', width:50, align:'center', toolbar: '#barDemo',hiddenField:'product_hashLink',hiddenField: 'msg_id'}
+        ]]
+      });
+      table.on('tool(test)', function(obj){ //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
+          var data = obj.data;
+          var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+          var tr = obj.tr; //获得当前行 tr 的 DOM 对象（如果有的话）
+
+          if(layEvent === 'detail'){ //查看
+            layer.open({
+              type: 2 //Page层类型
+              ,area: ['800px', '450px']
+              ,title: 'blockchainID:'+data.product_bcId
+              ,shade: 0.6 //遮罩透明度
+              ,maxmin: true //允许全屏最小化
+              ,anim: 1 //0-6的动画形式，-1不开
+              ,content: '/buyer/buyershoppingdetail?hash='+data.product_hashLink+'&msg_id='+data.msg_id
+            });
+
+          }
+      });
+
+             $('body').on('keyup','#search',function(data){
+          if(data.keyCode ==13){
+            search = $("#search").val();
+            if(search != ''){
+                {#layer.msg(search);#}
+                table.reload('demo',{
+                    where:{
+                        'search':search
+                    }
+                    ,page: {
+                        curr: 1
+                    }
+                    ,url: '/buyer/shoppingcarfuzzysearch'
+                    ,method: 'GET'
+                 });
+            }else {
+                table.reload('demo',{
+                    url: '/buyer/buyershoppingcarlist'
+                    ,method: 'GET'
+                 });
+            }
+        }
+      });
+    });
+    </script>
+    <script type="text/html" id="barDemo">
+      <a class="layui-btn layui-btn-xs" lay-event="detail">详情</a>
+    </script>
+    <script type="text/html" id="toolbarDemo" >
+       <input class="text" style="height:30px;width:157px;" name="search" id="search" placeholder="请输入关键词">
+       <a id="" lay-filter="" style="position: absolute;left: 144px;">
+            <i  name = 'submit' id ='submit 'class="layui-icon layui-icon-search" style="background:#fff;padding:5px;"></i>
+       </a>
+  </script>
+    </body>
+</html>
